@@ -49,15 +49,15 @@ def scrape_recipe():
                 parsed = parse_ingredient(ingredient)
                 # Convert parsed ingredient to dict to make it JSON serializable
                 parsed_dict = {
-                    'name': parsed.name.text if parsed.name else None,
-                    'size': parsed.size.text if parsed.size else None,
+                    'name': parsed.name,
+                    'size': parsed.size,
                     'amount': [{
                         'quantity': float(amt.quantity) if amt.quantity else None,
                         'unit': str(amt.unit) if amt.unit else None
                     } for amt in parsed.amount],
-                    'preparation': parsed.preparation.text if parsed.preparation else None,
-                    'comment': parsed.comment.text if parsed.comment else None,
-                    'purpose': parsed.purpose.text if parsed.purpose else None,
+                    'preparation': parsed.preparation,
+                    'comment': parsed.comment,
+                    'purpose': parsed.purpose,
                     'original': ingredient
                 }
                 parsed_ingredients.append(parsed_dict)

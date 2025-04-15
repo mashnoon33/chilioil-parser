@@ -5,7 +5,7 @@ from urllib.parse import urlparse
 from urllib.request import urlopen
 import os
 from dotenv import load_dotenv
-
+from ingredient_parser import parse_ingredient
 
 load_dotenv()
 
@@ -43,6 +43,28 @@ def scrape_recipe():
         
         # Convert to JSON
         recipe_data = scraper.to_json()
+        parsed_ingredients = []
+        for ingredient in recipe_data['ingredients']:
+            try:
+                parsed = parse_ingredient(ingredient)
+                # Convert parsed ingredient to dict to make it JSON serializable
+                parsed_dict = {
+                    'name': parsed.name.text if parsed.name else None,
+                    'size': parsed.size.text if parsed.size else None,
+                    'amount': [{
+                        'quantity': float(amt.quantity) if amt.quantity else None,
+                        'unit': str(amt.unit) if amt.unit else None
+                    } for amt in parsed.amount],
+                    'preparation': parsed.preparation.text if parsed.preparation else None,
+                    'comment': parsed.comment.text if parsed.comment else None,
+                    'purpose': parsed.purpose.text if parsed.purpose else None,
+                    'original': ingredient
+                }
+                parsed_ingredients.append(parsed_dict)
+            except Exception as e:
+                print(f"Error parsing ingredient: {e}")
+                parsed_ingredients.append({'original': ingredient})  # Keep original ingredient on parse failure
+        recipe_data['parsed_ingredients'] = parsed_ingredients
         
         return jsonify(recipe_data)
         
